@@ -23,6 +23,7 @@
 #include "restartsig.c"
 #include "scratchpad.c"
 #include "shiftviewclients.c"
+#include "sizehints_ruled.c"
 #include "swallow.c"
 #include "tagothermonitor.c"
 #include "vanitygaps.c"
