@@ -153,6 +153,7 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
 	RULE(.class = "netease-cloud-music", .isfloating = 1)
 	RULE(.class = "Gimp", .tags = 1 << 4)
+	RULE(.class = "st", .isterminal = 1)
 	RULE(.class = "St", .isterminal = 1)
 	RULE(.class = "Firefox", .tags = 1 << 7)
 	RULE(.instance = "spterm", .tags = SPTAG(0), .isfloating = 1)
