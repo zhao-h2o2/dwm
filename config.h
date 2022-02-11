@@ -18,7 +18,6 @@ static const int topbar                  = 1;   /* 0 means bottom bar */
 static const int statusmon               = 'A';
 
 /* Indicators: see patch/bar_indicators.h for options */
-static int tagindicatortype              = INDICATOR_TOP_LEFT_SQUARE;
 static int tiledindicatortype            = INDICATOR_NONE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_SQUARE;
 static const int quit_empty_window_count = 0;   /* only allow dwm to quit if no (<= count) windows are open */
@@ -179,7 +178,7 @@ static const MonitorRule monrules[] = {
  *    widthfunc, drawfunc, clickfunc - providing bar module width, draw and click functions
  *    name - does nothing, intended for visual clue and for logging / debugging
  */
-static const BarRule barrules[] = {-1};
+static const BarRule barrules[] = {{-1}};
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
