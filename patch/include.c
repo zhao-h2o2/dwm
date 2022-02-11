@@ -3,6 +3,7 @@
 #include "bar_tagicons.c"
 
 #include "bar_anybar.c"
+#include "bar_ewmhtags.c"
 
 /* Other patches */
 #include "autostart.c"

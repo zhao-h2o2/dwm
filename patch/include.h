@@ -3,6 +3,7 @@
 #include "bar_tagicons.h"
 
 #include "bar_anybar.h"
+#include "bar_ewmhtags.h"
 
 /* Other patches */
 #include "autostart.h"
