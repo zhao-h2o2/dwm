@@ -70,6 +70,7 @@ static void
 togglegaps(const Arg *arg)
 {
 	selmon->pertag->enablegaps[selmon->pertag->curtag] = !selmon->pertag->enablegaps[selmon->pertag->curtag];
+
 	arrange(NULL);
 }
 

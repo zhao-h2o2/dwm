@@ -219,6 +219,7 @@ struct Client {
 	unsigned int switchtag;
 	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
 	int needresize;
+	int isfreesize;
 	int isterminal, noswallow;
 	pid_t pid;
 	Client *next;
@@ -282,6 +283,7 @@ typedef struct {
 	unsigned int tags;
 	int switchtag;
 	int isfloating;
+	int isfreesize;
 	int isterminal;
 	int noswallow;
 	int monitor;
@@ -467,6 +469,7 @@ applyrules(Client *c)
 
 	/* rule matching */
 	c->noswallow = -1;
+	c->isfreesize = 1;
 	c->isfloating = 0;
 	c->tags = 0;
 	XGetClassHint(dpy, c->win, &ch);
@@ -486,6 +489,7 @@ applyrules(Client *c)
 		{
 			c->isterminal = r->isterminal;
 			c->noswallow = r->noswallow;
+			c->isfreesize = r->isfreesize;
 			c->isfloating = r->isfloating;
 			c->tags |= r->tags;
 			if ((r->tags & SPTAGMASK) && r->isfloating) {
@@ -2777,12 +2781,12 @@ updatesizehints(Client *c)
 		c->maxa = (float)size.max_aspect.x / size.max_aspect.y;
 	} else
 		c->maxa = c->mina = 0.0;
-	if (size.flags & PSize) {
+	if ((size.flags & PSize) && c->isfreesize)
+	{
 		c->basew = size.base_width;
 		c->baseh = size.base_height;
 		c->isfloating = 1;
 	}
-	checkfloatingrules(c);
 	c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
 }
 

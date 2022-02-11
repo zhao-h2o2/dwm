@@ -20,7 +20,6 @@
 #include "restartsig.h"
 #include "scratchpad.h"
 #include "shiftviewclients.h"
-#include "sizehints_ruled.h"
 #include "swallow.h"
 #include "tagothermonitor.h"
 #include "vanitygaps.h"
