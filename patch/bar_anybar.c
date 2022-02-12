@@ -37,8 +37,6 @@ managealtbar(Window win, XWindowAttributes *wa)
 void
 spawnbar()
 {
-	if (*altbarcmd)
-		system(altbarcmd);
 }
 
 void
