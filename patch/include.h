@@ -14,7 +14,6 @@
 #include "ipc.h"
 #include "ipc/ipc.h"
 #include "ipc/util.h"
-#include "keymodes.h"
 #include "movestack.h"
 #include "pertag.h"
 #include "restartsig.h"

@@ -230,7 +230,6 @@ static const char *termcmd[]  = { "st", NULL };
 
 static Key keys[] = {
 	/* modifier                     key            function                argument */
-	{ MODKEY,                       XK_Escape,     setkeymode,             {.ui = COMMANDMODE} },
 	{ MODKEY,                       XK_p,          spawn,                  {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return,     spawn,                  {.v = termcmd } },
 	{ MODKEY,                       XK_b,          togglebar,              {0} },
@@ -293,29 +292,6 @@ static Key keys[] = {
 	TAGKEYS(                        XK_9,                                  8)
 };
 
-static Key cmdkeys[] = {
-	/* modifier                    keys                     function         argument */
-	{ 0,                           XK_Escape,               clearcmd,        {0} },
-	{ ControlMask,                 XK_c,                    clearcmd,        {0} },
-	{ 0,                           XK_i,                    setkeymode,      {.ui = INSERTMODE} },
-};
-
-static Command commands[] = {
-	/* modifier (4 keys)                          keysyms (4 keys)                                function         argument */
-	{ {ControlMask, ShiftMask,  0,         0},    {XK_w,      XK_h,     0,         0},            setlayout,       {.v = &layouts[0]} },
-	{ {ControlMask, 0,          0,         0},    {XK_w,      XK_o,     0,         0},            setlayout,       {.v = &layouts[2]} },
-	{ {ControlMask, ShiftMask,  0,         0},    {XK_w,      XK_o,     0,         0},            onlyclient,      {0} },
-	{ {ControlMask, 0,          0,         0},    {XK_w,      XK_v,     0,         0},            setlayout,       {.v = &layouts[0]} },
-	{ {ControlMask, 0,          0,         0},    {XK_w,      XK_less,  0,         0},            setmfact,        {.f = -0.05} },
-	{ {ControlMask, ShiftMask,  0,         0},    {XK_w,      XK_less,  0,         0},            setmfact,        {.f = +0.05} },
-	{ {ControlMask, ShiftMask,  0,         0},    {XK_w,      XK_0,     0,         0},            setmfact,        {.f = +1.50} },
-	{ {ShiftMask,   0,          0,         0},    {XK_period, XK_e,     0,         0},            spawn,           {.v = dmenucmd} },
-	{ {ShiftMask,   0,          0,         0},    {XK_period, XK_o,     0,         0},            spawn,           {.v = dmenucmd} },
-	{ {ShiftMask,   0,          0,         0},    {XK_period, XK_q,     XK_Return, 0},            quit,            {0} },
-	{ {ShiftMask,   0,          0,         0},    {XK_period, XK_b,     XK_d,      XK_Return},    killclient,      {0} },
-	{ {ShiftMask,   0,          0,         0},    {XK_period, XK_b,     XK_n,      XK_Return},    focusstack,      {.i = +1} },
-	{ {ShiftMask,   0,          ShiftMask, 0},    {XK_period, XK_b,     XK_n,      XK_Return},    focusstack,      {.i = -1} },
-};
 
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
@@ -345,7 +321,6 @@ static Signal signals[] = {
 	{ "incnmaster",              incnmaster },
 	{ "togglefloating",          togglefloating },
 	{ "focusmon",                focusmon },
-	{ "setkeymode",              setkeymode },
 	{ "tagmon",                  tagmon },
 	{ "zoom",                    zoom },
 	{ "incrgaps",                incrgaps },
@@ -399,7 +374,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( view, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( zoom, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( fullscreen, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( setkeymode, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( shiftviewclients, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( tagnextmonex, 1, {ARG_TYPE_UINT} ),

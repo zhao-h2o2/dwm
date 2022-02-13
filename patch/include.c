@@ -18,7 +18,6 @@
 #include "ipc/ipc.c"
 #include "ipc/util.c"
 #endif
-#include "keymodes.c"
 #include "movestack.c"
 #include "pertag.c"
 #include "restartsig.c"
