@@ -244,9 +244,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_F2,         setlayout,              {.v = &layouts[1]} },
 	{ MODKEY,                       XK_F3,         setlayout,              {.v = &layouts[2]} },
 
-	{ MODKEY,                       XK_Tab,        view,                   {0} },
-	{ MODKEY|Mod1Mask,              XK_Tab,        shiftviewclients,       { .i = -1 } },
-	{ MODKEY|Mod1Mask,              XK_backslash,  shiftviewclients,       { .i = +1 } },
+	{ MODKEY,                       XK_Tab,        shiftviewclients,       { .i = +1 } },
+	{ MODKEY|ShiftMask,             XK_Tab,        shiftviewclients,       { .i = -1 } },
 	{ MODKEY,                       XK_0,          view,                   {.ui = ~SPTAGMASK } },
 	{ MODKEY|ShiftMask,             XK_0,          tag,                    {.ui = ~SPTAGMASK } },
 
