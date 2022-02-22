@@ -27,9 +27,9 @@ static char normbgcolor[]                = "#222222";
 static char normbordercolor[]            = "#444444";
 static char normfloatcolor[]             = "#db8fd9";
 static char selfgcolor[]                 = "#eeeeee";
-static char selbgcolor[]                 = "#005577";
-static char selbordercolor[]             = "#005577";
-static char selfloatcolor[]              = "#005577";
+static char selbgcolor[]                 = "#EC7875";
+static char selbordercolor[]             = "#EC7875";
+static char selfloatcolor[]              = "#EC7875";
 
 
 static char *colors[][ColCount] = {
