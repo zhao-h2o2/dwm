@@ -110,6 +110,7 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "UTILITY", .isfloating = 1)
 	RULE(.wintype = WTYPE "TOOLBAR", .isfloating = 1)
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
+	RULE(.title = "ZotFile Preferences", .isfloating = 1)
 	RULE(.class = "Gimp", .tags = 1 << 3)
 	RULE(.class = "Inkscape", .tags = 1 << 3)
 	RULE(.class = "Blender", .tags = 1 << 3)
