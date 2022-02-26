@@ -519,8 +519,9 @@ applyrules(Client *c)
 						pertagview(&((Arg) { .ui = newtagset }));
 						arrange(c->mon);
 					} else {
-						c->mon->tagset[c->mon->seltags] = newtagset;
-						arrange(c->mon);
+						for (m = mons; m; m = m->next)
+							m->tagset[m->seltags] = newtagset;
+						arrange(NULL);
 					}
 				}
 			}
@@ -2442,6 +2443,8 @@ void
 toggleview(const Arg *arg)
 {
 	unsigned int newtagset = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);;
+	Monitor *origselmon = selmon;
+	for (selmon = mons; selmon; selmon = selmon->next) {
 	int i;
 
 
@@ -2466,8 +2469,12 @@ toggleview(const Arg *arg)
 		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
+	}
+	}
+	selmon = origselmon;
+	if (newtagset) {
 		focus(NULL);
-		arrange(selmon);
+		arrange(NULL);
 	}
 	updatecurrentdesktop();
 }
@@ -2845,6 +2852,8 @@ updatewmhints(Client *c)
 void
 view(const Arg *arg)
 {
+	Monitor *origselmon = selmon;
+	for (selmon = mons; selmon; selmon = selmon->next) {
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 	{
 		view(&((Arg) { .ui = 0 }));
@@ -2852,8 +2861,10 @@ view(const Arg *arg)
 	}
 	selmon->seltags ^= 1; /* toggle sel tagset */
 	pertagview(arg);
+	}
+	selmon = origselmon;
 	focus(NULL);
-	arrange(selmon);
+	arrange(NULL);
 	updatecurrentdesktop();
 }
 
