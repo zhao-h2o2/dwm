@@ -213,7 +213,7 @@ struct Client {
 	int x, y, w, h;
 	int sfx, sfy, sfw, sfh; /* stored float geometry, used on mode revert */
 	int oldx, oldy, oldw, oldh;
-	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
+	int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
 	int bw, oldbw;
 	unsigned int tags;
 	unsigned int switchtag;
@@ -246,7 +246,6 @@ typedef struct {
 
 typedef struct Pertag Pertag;
 struct Monitor {
-	int index;
 	char ltsymbol[16];
 	float mfact;
 	int nmaster;
@@ -519,9 +518,8 @@ applyrules(Client *c)
 						pertagview(&((Arg) { .ui = newtagset }));
 						arrange(c->mon);
 					} else {
-						for (m = mons; m; m = m->next)
-							m->tagset[m->seltags] = newtagset;
-						arrange(NULL);
+						c->mon->tagset[c->mon->seltags] = newtagset;
+						arrange(c->mon);
 					}
 				}
 			}
@@ -568,6 +566,8 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 	if (*w < bh)
 		*w = bh;
 	if (resizehints || c->isfloating || !c->mon->lt[c->mon->sellt]->arrange) {
+		if (!c->hintsvalid)
+			updatesizehints(c);
 		/* see last two sentences in ICCCM 4.1.2.3 */
 		baseismin = c->basew == c->minw && c->baseh == c->minh;
 		if (!baseismin) { /* temporarily remove base dimensions */
@@ -665,7 +665,7 @@ buttonpress(XEvent *e)
 				br = &barrules[r];
 				if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->clickfunc == NULL)
 					continue;
-				if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->index)
+				if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
 					continue;
 				if (bar->x[r] <= ev->x && ev->x <= bar->x[r] + bar->w[r]) {
 					carg.x = ev->x - bar->x[r];
@@ -940,10 +940,10 @@ createmon(void)
 	m->gappoh = gappoh;
 	m->gappov = gappov;
 	for (mi = 0, mon = mons; mon; mon = mon->next, mi++); // monitor index
-	m->index = mi;
+	m->num = mi;
 	for (j = 0; j < LENGTH(monrules); j++) {
 		mr = &monrules[j];
-		if ((mr->monitor == -1 || mr->monitor == mi)
+		if ((mr->monitor == -1 || mr->monitor == m->num)
 				&& (mr->tag <= 0 || (m->tagset[0] & (1 << (mr->tag - 1))))
 		) {
 			layout = MAX(mr->layout, 0);
@@ -967,7 +967,7 @@ createmon(void)
 	/* Derive the number of bars for this monitor based on bar rules */
 	for (n = -1, i = 0; i < LENGTH(barrules); i++) {
 		br = &barrules[i];
-		if (br->monitor == 'A' || br->monitor == -1 || br->monitor == mi)
+		if (br->monitor == 'A' || br->monitor == -1 || br->monitor == m->num)
 			n = MAX(br->bar, n);
 	}
 
@@ -998,7 +998,7 @@ createmon(void)
 		/* init layouts */
 		for (j = 0; j < LENGTH(monrules); j++) {
 			mr = &monrules[j];
-			if ((mr->monitor == -1 || mr->monitor == mi) && (mr->tag == -1 || mr->tag == i)) {
+			if ((mr->monitor == -1 || mr->monitor == m->num) && (mr->tag == -1 || mr->tag == i)) {
 				layout = MAX(mr->layout, 0);
 				layout = MIN(layout, LENGTH(layouts) - 1);
 				m->pertag->ltidxs[i][0] = &layouts[layout];
@@ -1123,7 +1123,7 @@ drawbarwin(Bar *bar)
 		br = &barrules[r];
 		if (br->bar != bar->idx || !br->widthfunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
-		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->index)
+		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
 			continue;
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		warg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
@@ -1540,7 +1540,6 @@ manage(Window w, XWindowAttributes *wa)
 	else
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
 	configure(c); /* propagates border_width, if size doesn't change */
-	updatesizehints(c);
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
 	updatewmhints(c);
@@ -1555,7 +1554,7 @@ manage(Window w, XWindowAttributes *wa)
 	grabbuttons(c, 0);
 
 	if (!c->isfloating)
-		c->isfloating = c->oldstate = trans != None || c->isfixed;
+		c->isfloating = c->oldstate = t || c->isfixed;
 	if (c->isfloating) {
 		XRaiseWindow(dpy, c->win);
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
@@ -1736,7 +1735,7 @@ propertynotify(XEvent *e)
 				arrange(c->mon);
 			break;
 		case XA_WM_NORMAL_HINTS:
-			updatesizehints(c);
+			c->hintsvalid = 0;
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);
@@ -2443,8 +2442,6 @@ void
 toggleview(const Arg *arg)
 {
 	unsigned int newtagset = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);;
-	Monitor *origselmon = selmon;
-	for (selmon = mons; selmon; selmon = selmon->next) {
 	int i;
 
 
@@ -2469,12 +2466,8 @@ toggleview(const Arg *arg)
 		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
-	}
-	}
-	selmon = origselmon;
-	if (newtagset) {
 		focus(NULL);
-		arrange(NULL);
+		arrange(selmon);
 	}
 	updatecurrentdesktop();
 }
@@ -2672,46 +2665,42 @@ updategeom(void)
 				memcpy(&unique[j++], &info[i], sizeof(XineramaScreenInfo));
 		XFree(info);
 		nn = j;
-		if (n <= nn) { /* new monitors available */
-			for (i = 0; i < (nn - n); i++) {
-				for (m = mons; m && m->next; m = m->next);
-				if (m)
-					m->next = createmon();
-				else
-					mons = createmon();
-			}
-			for (i = 0, m = mons; i < nn && m; m = m->next, i++) {
-				if (i >= n
-				|| unique[i].x_org != m->mx || unique[i].y_org != m->my
-				|| unique[i].width != m->mw || unique[i].height != m->mh)
-				{
-					dirty = 1;
-					m->num = i;
-					m->mx = m->wx = unique[i].x_org;
-					m->my = m->wy = unique[i].y_org;
-					m->mw = m->ww = unique[i].width;
-					m->mh = m->wh = unique[i].height;
-					updatebarpos(m);
-				}
-			}
-		} else { /* less monitors available nn < n */
-			for (i = nn; i < n; i++) {
-				for (m = mons; m && m->next; m = m->next);
-				while ((c = m->clients)) {
-					dirty = 1;
-					m->clients = c->next;
-					detachstack(c);
-					c->mon = mons;
-					attach(c);
-					attachstack(c);
-				}
-				if (m == selmon)
-					selmon = mons;
-				cleanupmon(m);
-			}
+		/* new monitors if nn > n */
+		for (i = n; i < nn; i++) {
+			for (m = mons; m && m->next; m = m->next);
+			if (m)
+				m->next = createmon();
+			else
+				mons = createmon();
 		}
-		for (i = 0, m = mons; m; m = m->next, i++)
-			m->index = i;
+		for (i = 0, m = mons; i < nn && m; m = m->next, i++)
+			if (i >= n
+			|| unique[i].x_org != m->mx || unique[i].y_org != m->my
+			|| unique[i].width != m->mw || unique[i].height != m->mh)
+			{
+				dirty = 1;
+				m->num = i;
+				m->mx = m->wx = unique[i].x_org;
+				m->my = m->wy = unique[i].y_org;
+				m->mw = m->ww = unique[i].width;
+				m->mh = m->wh = unique[i].height;
+				updatebarpos(m);
+			}
+		/* removed monitors if n > nn */
+		for (i = nn; i < n; i++) {
+			for (m = mons; m && m->next; m = m->next);
+			while ((c = m->clients)) {
+				dirty = 1;
+				m->clients = c->next;
+				detachstack(c);
+				c->mon = mons;
+				attach(c);
+				attachstack(c);
+			}
+			if (m == selmon)
+				selmon = mons;
+			cleanupmon(m);
+		}
 		free(unique);
 	} else
 #endif /* XINERAMA */
@@ -2795,6 +2784,7 @@ updatesizehints(Client *c)
 		c->isfloating = 1;
 	}
 	c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
+	c->hintsvalid = 1;
 }
 
 void
@@ -2852,8 +2842,6 @@ updatewmhints(Client *c)
 void
 view(const Arg *arg)
 {
-	Monitor *origselmon = selmon;
-	for (selmon = mons; selmon; selmon = selmon->next) {
 	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 	{
 		view(&((Arg) { .ui = 0 }));
@@ -2861,10 +2849,8 @@ view(const Arg *arg)
 	}
 	selmon->seltags ^= 1; /* toggle sel tagset */
 	pertagview(arg);
-	}
-	selmon = origselmon;
 	focus(NULL);
-	arrange(NULL);
+	arrange(selmon);
 	updatecurrentdesktop();
 }
 
