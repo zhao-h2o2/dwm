@@ -6,7 +6,7 @@ static const unsigned int snap           = 32;  /* snap pixel */
 static const int swallowfloating         = 0;   /* 1 means swallow floating windows by default */
 static const unsigned int gappih         = 10;  /* horiz inner gap between windows */
 static const unsigned int gappiv         = 10;  /* vert inner gap between windows */
-static const unsigned int gappoh         = 10;  /* horiz outer gap between windows and screen edge */
+static const unsigned int gappoh         = 5;  /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov         = 10;  /* vert outer gap between windows and screen edge */
 static const int smartgaps_fact          = 0;   /* gap factor when there is only one client; 0 = no gaps, 3 = 3x outer gaps */
 static const int usealtbar               = 1;        /* 1 means use non-dwm status bar */
@@ -81,6 +81,7 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "UTILITY", .isfloating = 1)
 	RULE(.wintype = WTYPE "TOOLBAR", .isfloating = 1)
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
+	RULE(.class = "Ulauncher", .isfloating = 1)
 	RULE(.title = "ZotFile Preferences", .isfloating = 1)
 	RULE(.class = "Gimp", .tags = 1 << 3)
 	RULE(.class = "Inkscape", .tags = 1 << 3)
@@ -161,6 +162,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_Return,     spawn,                  {.v = termcmd } },
 	{ MODKEY,                       XK_q,          killclient,             {0} },
 	{ MODKEY,                       XK_p,          spawn,                  {.v = dmenucmd } },
+	{ Mod1Mask,                     XK_space,      spawn,                  SHCMD("launcher")  },
 	{ MODKEY,                       XK_j,          focusstack,             {.i = +1 } },
 	{ MODKEY,                       XK_k,          focusstack,             {.i = -1 } },
 	{ MODKEY,                       XK_m,          focusmaster,            {0} },
